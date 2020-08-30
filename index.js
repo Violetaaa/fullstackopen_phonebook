@@ -20,15 +20,12 @@ let persons = [
         number: "123",
       }
 ]
-
-
+//diaplay all
 app.get('/api/persons', (req, res) => {
-  console.log("headers", req.headers)
-  console.log("body", req.body)
-  console.log("content", req.content)
   res.json(persons)
 })
 
+//diaplay info
 app.get('/api/info', (req, res) => {
   const data = `
     <p>Phonebook has info for ${persons.length} people</p>
@@ -57,20 +54,39 @@ app.delete('/api/persons/:id', (req, res) => {
   res.status(204).end()
 })
 
-
 //add a new phonebook entrie
 app.post('/api/persons', (req, res) => {
-  const person = req.body
-  person.id = Math.floor(Math.random() * 1000000) 
+  const body = req.body
 
-  console.log(person)
+  if (!body.name) {
+    return res.status(400).json({ 
+      error: 'name missing' 
+    })
+  }
 
+  if (!body.number) {
+    return res.status(400).json({ 
+      error: 'number missing' 
+    })
+  }
+
+  if(persons.find(person => person.name === body.name)){
+    return res.status(400).json({ 
+      error: 'name already exists' 
+    })
+  }
+  
+  const person = {
+    id: Math.floor(Math.random() * 1000000),
+    name: body.name,
+    number: body.number
+  }
+
+  // console.log(person)
   persons = persons.concat(person)
   
   res.json(person)
 })
-
-
 
 const PORT = 3001
 app.listen(PORT, () => {
