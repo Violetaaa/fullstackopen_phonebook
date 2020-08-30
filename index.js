@@ -1,26 +1,38 @@
 const express = require('express')
 const morgan = require('morgan');
 const app = express()
-app.use(morgan(tiny));
+
 app.use(express.json())
 
+// app.use(morgan(tiny));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
+
+morgan.token('body-content', function (req, res) {
+  const person = {
+    name: req.body.name,
+    number: req.body.number
+  }
+  return JSON.stringify(person)
+});
+
 let persons = [
-    {
-        id: 1,
-        name: "Pepe",
-        number: "000000000",
-      },
-      {
-        id: 2,
-        name: "Pepa",
-        number: "000000001",
-      },
-      {
-        id: 3,
-        name: "Pepito2",
-        number: "123",
-      }
+  {
+    id: 1,
+    name: "Pepe",
+    number: "000000000",
+  },
+  {
+    id: 2,
+    name: "Pepa",
+    number: "000000001",
+  },
+  {
+    id: 3,
+    name: "Pepito2",
+    number: "123",
+  }
 ]
+
 //diaplay all
 app.get('/api/persons', (req, res) => {
   res.json(persons)
@@ -33,15 +45,15 @@ app.get('/api/info', (req, res) => {
     <p>${new Date()}</p>
   `
   res.send(data)
-  })
+})
 
 //display a single phonebook entry
 app.get('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
   const person = persons.find(person => person.id === id)
-  
-  if(person){
-    res.json(person) 
+
+  if (person) {
+    res.json(person)
   } else {
     res.status(404).end()
   }
@@ -60,23 +72,23 @@ app.post('/api/persons', (req, res) => {
   const body = req.body
 
   if (!body.name) {
-    return res.status(400).json({ 
-      error: 'name missing' 
+    return res.status(400).json({
+      error: 'name missing'
     })
   }
 
   if (!body.number) {
-    return res.status(400).json({ 
-      error: 'number missing' 
+    return res.status(400).json({
+      error: 'number missing'
     })
   }
 
-  if(persons.find(person => person.name === body.name)){
-    return res.status(400).json({ 
-      error: 'name already exists' 
+  if (persons.find(person => person.name === body.name)) {
+    return res.status(400).json({
+      error: 'name already exists'
     })
   }
-  
+
   const person = {
     id: Math.floor(Math.random() * 1000000),
     name: body.name,
@@ -85,13 +97,9 @@ app.post('/api/persons', (req, res) => {
 
   // console.log(person)
   persons = persons.concat(person)
-  
+
   res.json(person)
 })
-
-const morgan = (req, res) => {
-
-}
 
 const PORT = 3001
 app.listen(PORT, () => {
