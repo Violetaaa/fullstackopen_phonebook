@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express()
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
 
 let persons = [
     {
@@ -19,7 +21,11 @@ let persons = [
       }
 ]
 
+
 app.get('/api/persons', (req, res) => {
+  console.log("headers", req.headers)
+  console.log("body", req.body)
+  console.log("content", req.content)
   res.json(persons)
 })
 
@@ -52,8 +58,23 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 
+//add a new phonebook entrie
+app.post('/api/persons', (req, res) => {
+  const person = req.body
+  person.id = Math.floor(Math.random() * 1000000) 
+
+  console.log(person)
+
+  persons = persons.concat(person)
+  
+  res.json(person)
+})
+
+
 
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+
