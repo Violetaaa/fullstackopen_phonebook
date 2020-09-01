@@ -1,7 +1,10 @@
 const express = require('express')
-const morgan = require('morgan');
+const morgan = require('morgan')
+const cors = require('cors')
+
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 // app.use(morgan(tiny));
@@ -13,7 +16,7 @@ morgan.token('body-content', function (req, res) {
     number: req.body.number
   }
   return JSON.stringify(person)
-});
+})
 
 let persons = [
   {
@@ -69,6 +72,8 @@ app.delete('/api/persons/:id', (req, res) => {
 
 //add a new phonebook entrie
 app.post('/api/persons', (req, res) => {
+  console.log('hola')
+  
   const body = req.body
 
   if (!body.name) {
@@ -88,9 +93,10 @@ app.post('/api/persons', (req, res) => {
       error: 'name already exists'
     })
   }
+const id =Math.floor(Math.random() * 1000000)
 
   const person = {
-    id: Math.floor(Math.random() * 1000000),
+    id:id,
     name: body.name,
     number: body.number
   }
@@ -100,6 +106,7 @@ app.post('/api/persons', (req, res) => {
 
   res.json(person)
 })
+
 
 const PORT = 3001
 app.listen(PORT, () => {
