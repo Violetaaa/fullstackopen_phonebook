@@ -1,8 +1,9 @@
+require('dotenv').config()//requerir variables de entorno definidas en el archivo .env
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
-
 const app = express()
+const Person = require('./models/person') //mongodb
 
 app.use(cors())
 app.use(express.json())
@@ -19,27 +20,32 @@ morgan.token('body-content', function (req, res) {
   return JSON.stringify(person)
 })
 
-let persons = [
-  {
-    id: 1,
-    name: "Pepe",
-    number: "000000000",
-  },
-  {
-    id: 2,
-    name: "Pepa",
-    number: "000000001",
-  },
-  {
-    id: 3,
-    name: "Pepito2",
-    number: "123",
-  }
-]
+// let persons = [
+//   {
+//     id: 1,
+//     name: "Pepe",
+//     number: "000000000",
+//   },
+//   {
+//     id: 2,
+//     name: "Pepa",
+//     number: "000000001",
+//   },
+//   {
+//     id: 3,
+//     name: "Pepito2",
+//     number: "123",
+//   }
+// ]
 
 //diaplay all
+// app.get('/api/persons', (req, res) => {
+//   res.json(persons)
+// })
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
 })
 
 //diaplay info
@@ -51,16 +57,11 @@ app.get('/api/info', (req, res) => {
   res.send(data)
 })
 
-//display a single phonebook entry
+//display a single phonebook entry4e
 app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
+  Person.findById(req.params.id).then(person => {
     res.json(person)
-  } else {
-    res.status(404).end()
-  }
+  })
 })
 
 //delete a single phonebook entry 
@@ -73,8 +74,6 @@ app.delete('/api/persons/:id', (req, res) => {
 
 //add a new phonebook entrie
 app.post('/api/persons', (req, res) => {
-  console.log('hola')
-  
   const body = req.body
 
   if (!body.name) {
@@ -89,27 +88,31 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  if (persons.find(person => person.name === body.name)) {
-    return res.status(400).json({
-      error: 'name already exists'
-    })
-  }
-const id =Math.floor(Math.random() * 1000000)
+  // if (persons.find(person => person.name === body.name)) {
+  //   return res.status(400).json({
+  //     error: 'name already exists'
+  //   })
+  // }
 
-  const person = {
-    id:id,
+  //const id =Math.floor(Math.random() * 1000000)
+
+  const person = new Person({
     name: body.name,
     number: body.number
-  }
+  })
 
   // console.log(person)
-  persons = persons.concat(person)
+  // persons = persons.concat(person)
+  // res.json(person)
 
-  res.json(person)
+   person.save().then(savedPerson => {
+    console.log(`added ${person.name} number ${person.number} to phonebook`)
+   res.json(savedPerson)
+  })
 })
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
