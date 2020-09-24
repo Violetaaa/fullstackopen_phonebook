@@ -3,7 +3,8 @@ const express = require('express')
 const morgan = require('morgan')
 const app = express()
 const bodyParser = require('body-parser')
-const Person = require('./models/person') 
+require('dotenv').config()
+const Person = require('./models/person')
 
 app.use(bodyParser.json())
 app.use(express.static('build'))
@@ -27,13 +28,13 @@ app.get('/api/persons', (req, res) => {
 })
 
 //display info
-app.get('/api/info', (req, res) => {
+app.get('/api/info', (req, res, next) => {
   Person
     .find()
     .then(persons => {
       res.send(`Phonebook has info for ${persons.length} people. </br> ${Date()}`)
-  })
-  .catch(error => next(error))
+    })
+    .catch(error => next(error))
 })
 
 //display a single phonebook entry
@@ -49,7 +50,7 @@ app.get('/api/persons/:id', (req, res, next) => {
     .catch(error => next(error))
 })
 
-//update number 
+//update number
 app.put('/api/persons/:id', (req, res, next) => {
   const body = req.body
 
@@ -65,10 +66,10 @@ app.put('/api/persons/:id', (req, res, next) => {
     .catch(error => next(error))
 })
 
-//delete a single phonebook entry 
+//delete a single phonebook entry
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
-    .then(result => {
+    .then(res => {
       res.status(204).end()
     })
     .catch(error => next(error))
@@ -103,9 +104,9 @@ app.use(unknownEndpoint)
 const errorHandler = (error, req, res, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
     return res.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {    
+  } else if (error.name === 'ValidationError') {
     return res.status(400).json({ error: error.message })
   }
 
